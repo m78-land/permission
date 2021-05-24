@@ -1990,10 +1990,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@lxjx/preset-config@^0.1.0":
+"@lxjx/preset-config@0.1.0":
   version "0.1.0"
-  resolved "https://registry.npm.taobao.org/@lxjx/preset-config/download/@lxjx/preset-config-0.1.0.tgz#f61a8edb37bb7d40628fda3fc8a545e1f129976f"
-  integrity sha1-9hqO2ze7fUBij9o/yKVF4fEpl28=
+  resolved "https://registry.npmjs.org/@lxjx/preset-config/-/preset-config-0.1.0.tgz#f61a8edb37bb7d40628fda3fc8a545e1f129976f"
+  integrity sha512-bTSm/5UBNPXofp4hAcEvb3zNKweSYyzWGmwD6+725Q4S7nNWzUItpdECJKqWg3oGwn793Lm+HeqMEjyDH+u70A==
   dependencies:
     "@umijs/fabric" "2.2.0"
     prettier "^2.0.5"
