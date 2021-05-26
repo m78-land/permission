@@ -1,12 +1,12 @@
 import { isArray } from '@lxjx/utils';
-import { Seed } from '@m78/seed';
 import {
   AuthConfig,
   AuthKeys,
-  AuthSeed,
-  CreateAuthSeedConfig,
+  Auth,
+  CreateAuthConfig,
   Validators,
   ValidMeta,
+  Validator,
 } from './types';
 import {
   _AuthProShare,
@@ -14,6 +14,7 @@ import {
   _AuthProFullKeysMap,
   AuthProKeysMap,
   AuthProStrings,
+  _AuthSeedProState,
 } from './proType';
 
 export const throwWarning = (str: string) => {
@@ -34,14 +35,11 @@ export const validItem = (key: string, validators: Validators<any>, state: any, 
 /**
  * 实现auth() api
  * */
-export function authImpl<S, V extends Validators<S>>(
-  seed: Seed,
-  createConf: CreateAuthSeedConfig,
-): AuthSeed<S, V>['auth'] {
-  return (authKeys: AuthKeys<V>, config?: AuthConfig<S>) => {
-    const { validators, validFirst } = createConf;
+export function authImpl(conf: CreateAuthConfig): Auth {
+  return (authKeys: AuthKeys<any>, config?: AuthConfig) => {
+    const { validators, validFirst, seed } = conf;
     const state = seed.getState();
-    const { extra, validators: localValidators }: AuthConfig<S> = config || {};
+    const { extra, validators: localValidators }: AuthConfig = config || {};
 
     /** 所有验证失败结果 */
     const rejects: ValidMeta[] = [];
@@ -235,3 +233,51 @@ export function stringifyAuthMap(share: _AuthProShare, authMap: AuthProDetailMap
 
   return authKeys;
 }
+
+/**
+ * authPro内置验证器
+ * */
+export const authProValidatorGetter = (share: _AuthProShare) => {
+  const validator: Validator<_AuthSeedProState> = ({ authDetailMap }, keys?: AuthProStrings) => {
+    const { authNameMap } = share.config;
+
+    if (!authDetailMap) return;
+
+    // 没有传入要验证的权限
+    if (!isArray(keys) || !keys.length) return;
+
+    const beTestAuthMap = parseAuthString(share, keys);
+
+    if (!beTestAuthMap) return;
+
+    let rejects: any = null;
+
+    const infosMap = getAuthNameInfoMap(share);
+
+    for (const [authName, beTestAuth] of Object.entries(beTestAuthMap)) {
+      const userAuth = authDetailMap[authName];
+
+      const _keys = Object.keys(beTestAuth);
+
+      // 取出不满足的权限
+      const rejectKeys = _keys.filter(k => !(beTestAuth[k] && userAuth && userAuth[k]));
+
+      if (rejectKeys.length) {
+        // 根据key获取其文本
+        const labelKeys = rejectKeys.map(item => (infosMap[item] ? infosMap[item].label : item));
+
+        if (!rejects) rejects = [];
+
+        rejects.push({
+          missing: labelKeys,
+          originalName: authName,
+          name: authNameMap?.[authName] || authName,
+        });
+      }
+    }
+
+    if (rejects) return rejects;
+  };
+
+  return validator;
+};

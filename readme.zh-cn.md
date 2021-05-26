@@ -29,17 +29,16 @@ yarn add @m78/auth
 
 此库包含两种权限实现:
 
-1. 常规版本，验证通过本地验证器和当前状态来实现, 非常适合只包含少量验证的前台项目。
+1. 常规版本，验证通过本地验证器和一组状态来实现, 非常适合只包含中少量权限验证的前台项目。
 2. `Pro` 版本，通过进一步的封装简化了api的整体使用，适合包含大量复杂权限逻辑的中后台项目，并且可以非常简单的和任意后端体系集成。
 
 <br>
 
-* 此库底层采用了[@m78/seed](https://github.com/m78-core/seed)来管理状态, `seed`是一个非常简单易学的状态管理方案，使用前建议先了解下它的用法。
+* 此采用了[@m78/seed](https://github.com/m78-core/seed)来管理状态, `seed`是一个非常简单易学的状态管理方案，使用前建议先了解下它的用法。
 * 它被设计得足够通用，可以在任意js运行时使用，包括但不限于`nodejs` `ReactNative` `小程序 `等。
-* 如果你在前端框架中使用，可能会需要对其进行简单的封装, 若使用react，可以使用官方实现  [`m78/asee`](http://llixianjie.gitee.io/m78/docs/utils/seed) , 其他框架可以参考其实现来编写。
+* 如果你在前端框架中使用，可能会需要对其进行简单的封装, 若使用react，可以使用官方实现  [`m78/auth`](http://llixianjie.gitee.io/m78/docs/utils/auth) , 其他框架可以参考其实现来编写。
 
 <br>
-
 
 
 ## Auth
@@ -47,18 +46,21 @@ yarn add @m78/auth
 这是包含`Auth` 所有 `api` 的伪代码示例：
 
 ```ts
-import { authCreate } from '@m78/auth';
+import create from '@m78/seed';
+import { createAuth } from '@m78/auth';
 
-/** authCreate()用于创建一个Auth实例, 你可以创建任意多个不同配置的Auth实例 */
-const auth = authCreate({
-    /** 待注册的中间件, 详细信息请参见https://github.com/m78-core/seed */
-    middleware: [],
-    /** 初始状态 */
-    state: {
-        name: 'lxj',
-        roleType: 1,
-        age: 17,
-    },
+const seed = create({
+  /** 初始状态 */
+  state: {
+    name: 'lxj',
+    roleType: 1,
+    age: 17,
+  },
+});
+
+/** createAuth()用于创建一个Auth实例, 你可以创建任意多个不同配置的Auth实例 */
+const auth = createAuth({
+    seed,
     /**
       * 如果一个验证未通过，则阻止后续验证
       * - 对于or中的子权限，即使开启了validFirst，依然会对每一项进行验证，但是只会返回第一个
@@ -101,33 +103,8 @@ const auth = authCreate({
     }
 });
 
-// ###########################
-// 状态管理部分, 这些api继承自seed
-// ###########################
-
-// 更新state的值，只更新传入对象中包含的键
-auth.setState({ name: 'lj', });
-
-// 更新state的值，替换整个state对象
-auth.coverSetState({ name: 'lj', });
-
-// 获取当前state
-auth.getState();
-
-// 订阅state变更
-const unsub = subscribe((changes) => {
-    // ... 
-});
-
-// 取消订阅
-unsub();
-
-// ###########################
-// 			 权限部分
-// ###########################
-
 // 权限验证, 验证被拒绝时，会将所有未验证通过的验证器返回作为详细信息返回, 成功则返回null
-auth.auth(['isAdmin', 'is18plus']);
+auth(['isAdmin', 'is18plus']);
 
 // 验证失败的返回是这样子的
 [
@@ -151,10 +128,10 @@ auth.auth(['isAdmin', 'is18plus']);
 ]
 
 // 当权限项是一个数组时，表示条件`or`， 表示其中任意一个权限通过即可
-auth.auth(['isAdmin', ['is18plus', 'someVa..']]);
+auth(['isAdmin', ['is18plus', 'someVa..']]);
 
 // 传入配置
-auth.auth(['isAdmin'], {
+auth(['isAdmin'], {
   /** 传递给验证器的额外参数 */
   extra?: any;
   /** 局部验证器 */
@@ -169,7 +146,7 @@ auth.auth(['isAdmin'], {
 这是包含`AuthPro`所有 `api` 的伪代码示例：
 
 ```ts
-import { authProCreate } from '@m78/auth';
+import { createAuthPro } from '@m78/auth';
 
 /**
  * 权限使用包含格式如 `name:keys` 的数组表示
@@ -182,7 +159,7 @@ const authStrings = ['user:cud', 'news:cr'];
 
 
 /** 创建一个authPro */
-const authPro = authProCreate({
+const authPro = createAuthPro({
   /** 初始权限 */
   auth?: authStrings;
   /**

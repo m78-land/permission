@@ -30,15 +30,15 @@ yarn add @m78/auth
 
 This library contains two implementations of permissions:
 
-1. The regular version, the verification is achieved through the local verifier and the current state, which is very suitable for foreground projects that only contain a small amount of verification. 
+1. General Version, verify that through local validiar and a set of status, it is very suitable for reception projects that only contain small permissions verification 
 2. The `Pro` version simplifies the overall use of the api through further encapsulation. It is suitable for mid- and back-end projects that contain a large number of complex permissions logic, and can be easily integrated with any back-end system.
 
 <br>
 
 * this library uses [@m78/seed](https://github.com/m78-core/seed) to manage the state, `seed` is a very simple and easy-to-learn state management solution, it is recommended to understand it before using it Its usage. 
 
-* It is designed to be versatile enough to be used in any js runtime, including but not limited to `nodejs` `ReactNative` `mini programs` etc. 
-* If you use it in a front-end framework, you may need to simply encapsulate it. If you use react, you can use the official implementation [`m78/asee`](http://llixianjie.gitee.io/m78/docs/utils /seed), other frameworks can be written by referring to their implementation.
+* It is designed to be versatile enough to be used in any js runtime, including but not limited to `nodejs` `ReactNative` `wx mini programs` etc. 
+* If you use it in a front-end framework, you may need to simply encapsulate it. If you use react, you can use the official implementation [`m78/auth`](http://llixianjie.gitee.io/m78/docs/utils/auth), other frameworks can be written by referring to their implementation.
 
 <br>
 
@@ -49,18 +49,21 @@ This library contains two implementations of permissions:
 This is an example of pseudo code including all `api` of `Auth`:
 
 ```ts
-import { authCreate } from '@m78/auth';
+import create from '@m78/seed';
+import { createAuth } from '@m78/auth';
 
-/** authCreate() is used to create an Auth instance, you can create any number of Auth instances with different configurations */
-const auth = authCreate({
-    /** Middleware to be registered, please refer to https://github.com/m78-core/seed for details */
-    middleware: [],
-    /** init state */
-    state: {
-        name: 'lxj',
-        roleType: 1,
-        age: 17,
-    },
+const seed = create({
+  /** init state */
+  state: {
+    name: 'lxj',
+    roleType: 1,
+    age: 17,
+  },
+});
+
+/** createAuth() is used to create an Auth instance, you can create any number of Auth instances with different configurations */
+const auth = createAuth({
+    seed,
     /**
       * If one verification fails, block subsequent verifications
       * - For the sub-permissions in or, even if validFirst is enabled, each item will still be verified, but only the first one will be returned
@@ -103,33 +106,8 @@ const auth = authCreate({
     }
 });
 
-// ###########################
-// State management part, these APIs inherit from seed
-// ###########################
-
-// Update the value of state, only update the keys contained in the incoming object
-auth.setState({ name: 'lj', });
-
-// Update the value of state, replace the entire state object
-auth.coverSetState({ name: 'lj', });
-
-// Get current state
-auth.getState();
-
-// Subscribe to state changes
-const unsub = subscribe((changes) => {
-    // ... 
-});
-
-// unsubscribe
-unsub();
-
-// ###########################
-// 		    auth part
-// ###########################
-
 // Permission validation. When the validation is rejected, all unauthenticated validators are returned as details, and null on success
-auth.auth(['isAdmin', 'is18plus']);
+auth(['isAdmin', 'is18plus']);
 
 // The return of a failed validation would look like this
 [
@@ -153,10 +131,10 @@ auth.auth(['isAdmin', 'is18plus']);
 ]
 
 // When the permission item is an array, it indicates the condition 'OR', which means that any of the permissions can be passed
-auth.auth(['isAdmin', ['is18plus', 'someVa..']]);
+auth(['isAdmin', ['is18plus', 'someVa..']]);
 
 // configure
-auth.auth(['isAdmin'], {
+auth(['isAdmin'], {
   /** Extra parameters passed to the validator */
   extra?: any;
   /** Local validator */
@@ -171,7 +149,7 @@ auth.auth(['isAdmin'], {
 This is an example of pseudocode that contains all the 'AuthPro' APIs:
 
 ```ts
-import { authProCreate } from '@m78/auth';
+import { createAuthPro } from '@m78/auth';
 
 /**
  * Permissions are represented by an array containing the format 'name:keys'
@@ -184,7 +162,7 @@ const authStrings = ['user:cud', 'news:cr'];
 
 
 /** create a authPro */
-const authPro = authProCreate({
+const authPro = createAuthPro({
   /** init auth */
   auth?: authStrings;
   /**

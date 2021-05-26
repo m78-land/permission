@@ -1,7 +1,7 @@
-import { _authSeedCreate as authCreate } from './authSeedCreate';
-import { _authSeedProCreate as authProCreate } from './authSeedProCreate';
+import { _createAuth as createAuth } from './createAuth';
+import { _createAuthPro as createAuthPro } from './createAuthPro';
 import { AUTH_PRO_NAME } from './common';
 
-export { authCreate, authProCreate, AUTH_PRO_NAME };
+export { createAuth, createAuthPro, AUTH_PRO_NAME };
 export * from './types';
 export * from './proType';

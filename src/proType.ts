@@ -1,8 +1,9 @@
+import { Seed, SeedCreator } from '@m78/seed';
 import langConfig from './langConfig';
 
-/** 在不同函数见共享的数据 */
+/** 在不同函数共享的数据 */
 export interface _AuthProShare {
-  /** 创建配置 */
+  /** 配置 */
   config: AuthProConfig;
   /** 当前的语言配置对象 */
   cLang: typeof langConfig['en-US'];
@@ -39,9 +40,9 @@ export interface AuthProKeysMap {
   };
 }
 
-/** 基本与AuthProKeysMap相同，不过它完整的name作为key */
+/** 基本与AuthProKeysMap相同，不过它以完整的name作为key */
 export interface _AuthProFullKeysMap {
-  /** key为此权限的网站名称 */
+  /** key为此权限的完整名称 */
   [key: string]: {
     /** key的完整名称, 如 c 的完整 name 为 create */
     name: string;
@@ -75,7 +76,7 @@ export interface AuthProDetailMap {
   [key: string]: AuthProDetail;
 }
 
-/** 权限状态 */
+/** 内部权限状态 */
 export interface _AuthSeedProState {
   /** 用户当前的权限 */
   auth: AuthProStrings;
@@ -90,7 +91,7 @@ export interface AuthProConfig {
   /** 初始权限 */
   auth?: AuthProStrings;
   /**
-   * 添加除`c r u d`以外的自定义权限key
+   * 扩展除`c r u d`以外的自定义权限key
    * - 设置了 c r u d 中的任意key时，会将覆盖掉内部的默认配置
    * */
   customAuthKeysMap?: AuthProKeysMap;
@@ -100,6 +101,8 @@ export interface AuthProConfig {
   lang?: 'en-US' | 'zh-CN';
   /** 扩展语言包或覆盖现有语言包 */
   languages?: any;
+  /** 自定义seed构建器 */
+  seedCreator?: SeedCreator;
 }
 
 /** AuthPro对象 */
@@ -116,6 +119,8 @@ export interface AuthPro {
   parse: (keys: AuthProStrings) => AuthProDetailMap | null;
   /** 字符串化AuthProDetailMap并返回每个权限的AuthProStrings组成的数组 */
   stringify: (authMap: AuthProDetailMap) => AuthProStrings;
+  /** 内部使用的seed实例，大部分情况下应该避免使用 */
+  seed: Seed<_AuthSeedProState>;
 }
 
 /**

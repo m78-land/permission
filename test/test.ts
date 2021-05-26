@@ -1,9 +1,9 @@
-import { authCreate as create, authProCreate } from '../src';
+import create from '@m78/seed';
+import { createAuth, createAuthPro, CreateAuthConfig } from '../src';
 
 describe('auth', () => {
-  const getKit = (conf?: any) => {
-    return create({
-      ...conf,
+  const getAuth = (conf?: Partial<CreateAuthConfig>) => {
+    const seed = create({
       state: {
         verify: false,
         usr: {
@@ -12,6 +12,11 @@ describe('auth', () => {
           vip: false,
         },
       },
+    });
+
+    return createAuth({
+      ...conf,
+      seed,
       validators: {
         verify({ verify }) {
           if (!verify) {
@@ -58,9 +63,9 @@ describe('auth', () => {
   };
 
   test('base', () => {
-    const kit = getKit();
+    const auth = getAuth();
 
-    const rej = kit.auth(['login', 'vip', 'audit']);
+    const rej = auth(['login', 'vip', 'audit']);
     expect(rej).toEqual([
       {
         label: 'not vip',
@@ -70,25 +75,25 @@ describe('auth', () => {
   });
 
   test('or', () => {
-    const kit = getKit();
+    const auth = getAuth();
 
-    const rej = kit.auth(['login', ['vip', 'audit']]);
+    const rej = auth(['login', ['vip', 'audit']]);
 
     expect(rej).toBe(null);
   });
 
   test('extra', () => {
-    const kit = getKit();
+    const auth = getAuth();
 
-    const rej = kit.auth(['self'], { extra: 'lxj' });
+    const rej = auth(['self'], { extra: 'lxj' });
 
     expect(rej).toBe(null);
   });
 
   test('local validators & validFirst', () => {
-    const kit = getKit({ validFirst: true });
+    const auth = getAuth({ validFirst: true });
 
-    const rej = kit.auth(['isJxl', 'self'], {
+    const rej = auth(['isJxl', 'self'], {
       extra: 1,
       validators: {
         isJxl(deps, extra) {
@@ -119,7 +124,7 @@ describe('authPro', () => {
   };
 
   test('api', () => {
-    const ap = authProCreate({
+    const ap = createAuthPro({
       auth: ['user:cr', 'news:ud'], // init auth
     });
 
@@ -134,7 +139,7 @@ describe('authPro', () => {
   });
 
   test('setAuth() & getAuth() & getAuthDetail() & parse() & stringify()', () => {
-    const ap = authProCreate();
+    const ap = createAuthPro();
 
     ap.setAuth(authStrings);
 
@@ -148,7 +153,7 @@ describe('authPro', () => {
   });
 
   test('auth()', () => {
-    const ap = authProCreate({
+    const ap = createAuthPro({
       auth: authStrings,
     });
     expect(ap.auth(['user:ud', 'news:udc'])).toEqual([
@@ -160,7 +165,7 @@ describe('authPro', () => {
   });
 
   test('config', () => {
-    const ap = authProCreate({
+    const ap = createAuthPro({
       lang: 'zh-CN',
       auth: authStrings, // init auth
       customAuthKeysMap: {
