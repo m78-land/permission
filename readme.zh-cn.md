@@ -146,6 +146,7 @@ auth(['isAdmin'], {
 这是包含`AuthPro`所有 `api` 的伪代码示例：
 
 ```ts
+import create from '@m78/seed';
 import { createAuthPro } from '@m78/auth';
 
 /**
@@ -160,6 +161,8 @@ const authStrings = ['user:cud', 'news:cr'];
 
 /** 创建一个authPro */
 const authPro = createAuthPro({
+  /** 用于控制内部状态的seed */
+  seed: create(),
   /** 初始权限 */
   auth?: authStrings;
   /**

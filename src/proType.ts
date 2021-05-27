@@ -88,6 +88,8 @@ export interface _AuthSeedProState {
  * authPro的创建配置
  * */
 export interface AuthProConfig {
+  /** 用于控制内部状态的seed */
+  seed: Seed;
   /** 初始权限 */
   auth?: AuthProStrings;
   /**
@@ -101,8 +103,6 @@ export interface AuthProConfig {
   lang?: 'en-US' | 'zh-CN';
   /** 扩展语言包或覆盖现有语言包 */
   languages?: any;
-  /** 自定义seed构建器 */
-  seedCreator?: SeedCreator;
 }
 
 /** AuthPro对象 */
@@ -119,13 +119,11 @@ export interface AuthPro {
   parse: (keys: AuthProStrings) => AuthProDetailMap | null;
   /** 字符串化AuthProDetailMap并返回每个权限的AuthProStrings组成的数组 */
   stringify: (authMap: AuthProDetailMap) => AuthProStrings;
-  /** 内部使用的seed实例，大部分情况下应该避免使用 */
-  seed: Seed<_AuthSeedProState>;
 }
 
 /**
  * 实例创建器
  * */
 export interface AuthProCreator {
-  (config?: AuthProConfig): AuthPro;
+  (config: AuthProConfig): AuthPro;
 }

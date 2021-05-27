@@ -125,6 +125,7 @@ describe('authPro', () => {
 
   test('api', () => {
     const ap = createAuthPro({
+      seed: create(),
       auth: ['user:cr', 'news:ud'], // init auth
     });
 
@@ -139,7 +140,9 @@ describe('authPro', () => {
   });
 
   test('setAuth() & getAuth() & getAuthDetail() & parse() & stringify()', () => {
-    const ap = createAuthPro();
+    const ap = createAuthPro({
+      seed: create(),
+    });
 
     ap.setAuth(authStrings);
 
@@ -154,6 +157,7 @@ describe('authPro', () => {
 
   test('auth()', () => {
     const ap = createAuthPro({
+      seed: create(),
       auth: authStrings,
     });
     expect(ap.auth(['user:ud', 'news:udc'])).toEqual([
@@ -166,6 +170,7 @@ describe('authPro', () => {
 
   test('config', () => {
     const ap = createAuthPro({
+      seed: create(),
       lang: 'zh-CN',
       auth: authStrings, // init auth
       customAuthKeysMap: {

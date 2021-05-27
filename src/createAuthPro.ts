@@ -1,5 +1,4 @@
 import _defaultsDeep from 'lodash/defaultsDeep';
-import create from '@m78/seed';
 import { createAuth } from './index';
 import {
   AuthPro,
@@ -11,12 +10,11 @@ import {
 import { AUTH_PRO_NAME, parseAuthString, stringifyAuthMap, authProValidatorGetter } from './common';
 import langConfig from './langConfig';
 
-const defaultConfig: AuthProConfig = {
+const defaultConfig = ({
   auth: [],
   authNameMap: {},
   customAuthKeysMap: {},
-  seedCreator: create,
-};
+} as unknown) as AuthProConfig;
 
 const _createAuthPro: AuthProCreator = config => {
   const _config = {
@@ -33,11 +31,11 @@ const _createAuthPro: AuthProCreator = config => {
     config: _config,
   };
 
-  const seed = _config.seedCreator!({
-    state: {
-      auth: _config.auth!,
-      authDetailMap: parseAuthString(share, _config.auth!),
-    },
+  const { seed } = _config;
+
+  seed.setState({
+    auth: _config.auth!,
+    authDetailMap: parseAuthString(share, _config.auth!),
   });
 
   const authInstance = createAuth<_AuthSeedProState>({
@@ -68,7 +66,6 @@ const _createAuthPro: AuthProCreator = config => {
     },
     parse: keys => parseAuthString(share, keys),
     stringify: authMap => stringifyAuthMap(share, authMap),
-    seed,
   };
 
   return authPro;

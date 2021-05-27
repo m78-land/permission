@@ -149,6 +149,7 @@ auth(['isAdmin'], {
 This is an example of pseudocode that contains all the 'AuthPro' APIs:
 
 ```ts
+import create from '@m78/seed';
 import { createAuthPro } from '@m78/auth';
 
 /**
@@ -163,6 +164,8 @@ const authStrings = ['user:cud', 'news:cr'];
 
 /** create a authPro */
 const authPro = createAuthPro({
+  /** seed used to control internal state */
+  seed: create(),
   /** init auth */
   auth?: authStrings;
   /**

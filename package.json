@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@lxjx/utils": "^1.13.0",
-    "@m78/seed": "^2.0.1",
+    "@m78/seed": "^2.0.2",
     "@types/lodash": "^4.14.170",
     "lodash": "^4.17.21",
     "tslib": "^2.2.0"
