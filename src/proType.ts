@@ -1,4 +1,4 @@
-import { Seed, SeedCreator } from '@m78/seed';
+import { Seed } from '@m78/seed';
 import langConfig from './langConfig';
 
 /** 在不同函数共享的数据 */
