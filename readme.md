@@ -207,6 +207,8 @@ interface AuthPro {
   parse: (keys: AuthProStrings) => AuthProDetailMap | null;
   /** Stringize the AuthProDetailMap and return an array of AuthProStrings for each permission */
   stringify: (authMap: AuthProDetailMap) => AuthProStrings;
+  /** conventional version of the authore */
+  authInstance: Auth<_AuthSeedProState>;
 }
 
 

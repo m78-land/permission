@@ -1,5 +1,6 @@
 import { Seed } from '@m78/seed';
 import langConfig from './langConfig';
+import { Auth } from './types';
 
 /** 在不同函数共享的数据 */
 export interface _AuthProShare {
@@ -119,6 +120,8 @@ export interface AuthPro {
   parse: (keys: AuthProStrings) => AuthProDetailMap | null;
   /** 字符串化AuthProDetailMap并返回每个权限的AuthProStrings组成的数组 */
   stringify: (authMap: AuthProDetailMap) => AuthProStrings;
+  /** 内部使用的常规版auth实例 */
+  authInstance: Auth<_AuthSeedProState>;
 }
 
 /**

@@ -66,6 +66,7 @@ const _createAuthPro: AuthProCreator = config => {
     },
     parse: keys => parseAuthString(share, keys),
     stringify: authMap => stringifyAuthMap(share, authMap),
+    authInstance,
   };
 
   return authPro;
