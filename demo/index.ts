@@ -1,6 +1,8 @@
-import { authProCreate } from '../src/index';
+import create from '@m78/seed';
+import { createAuthPro } from '../src/index';
 
-const auth = authProCreate({
+const auth = createAuthPro({
+  seed: create(),
   languages: {
     'zh-CN': {
       noPermission: '😥 木有权限',
@@ -12,7 +14,7 @@ const auth = authProCreate({
     news: '新闻',
     audit: '审批',
   },
-  auth: ['user:d', 'news:cd'],
+  // auth: ['user:d', 'news:cd'],
   customAuthKeysMap: {
     a: {
       name: 'audit',
@@ -22,20 +24,3 @@ const auth = authProCreate({
 });
 
 console.log(auth.auth(['user:cua', 'audit:crud']));
-
-console.log(auth.parse(['user:crd', 'audit:rd']));
-
-console.log(
-  auth.stringify({
-    user: {
-      create: true,
-      retrieve: true,
-      delete: true,
-      audit: true,
-    },
-    audit: {
-      retrieve: true,
-      delete: true,
-    },
-  }),
-);

@@ -241,7 +241,14 @@ export const authProValidatorGetter = (share: _AuthProShare) => {
   const validator: Validator<_AuthSeedProState> = ({ authDetailMap }, keys?: AuthProStrings) => {
     const { authNameMap } = share.config;
 
-    if (!authDetailMap) return;
+    if (!authDetailMap)
+      return [
+        {
+          originalName: share.cLang.noPermission,
+          name: share.cLang.noPermission,
+          missing: [],
+        },
+      ];
 
     // 没有传入要验证的权限
     if (!isArray(keys) || !keys.length) return;
