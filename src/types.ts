@@ -55,6 +55,8 @@ export interface Auth<S = AnyObject, V = AnyObject> {
    * @return validMeta - 验证结果，如果验证通过则为null
    * */
   (authKeys: AuthKeys<V>, config: AuthConfig<S>): ValidMeta[] | null;
+  /** 由配置传入的seed的原样导出 */
+  seed: Seed;
 }
 
 /**

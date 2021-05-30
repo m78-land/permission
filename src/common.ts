@@ -36,7 +36,7 @@ export const validItem = (key: string, validators: Validators<any>, state: any, 
  * 实现auth() api
  * */
 export function authImpl(conf: CreateAuthConfig): Auth {
-  return (authKeys: AuthKeys<any>, config?: AuthConfig) => {
+  const auth = (authKeys: AuthKeys<any>, config?: AuthConfig) => {
     const { validators, validFirst, seed } = conf;
     const state = seed.getState();
     const { extra, validators: localValidators }: AuthConfig = config || {};
@@ -101,6 +101,10 @@ export function authImpl(conf: CreateAuthConfig): Auth {
 
     return rejects.length ? rejects : null;
   };
+
+  auth.seed = conf.seed;
+
+  return auth;
 }
 
 /**

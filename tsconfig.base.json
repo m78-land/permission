@@ -22,7 +22,8 @@
     "strict": true,
     "esModuleInterop": true,
     "jsx": "react",
-    "lib": ["dom", "esnext"]
+    "lib": ["dom", "esnext"],
+    "skipLibCheck": true
 //    "sourceMap": true
   }
 }

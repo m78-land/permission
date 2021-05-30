@@ -1,11 +1,16 @@
-import { authCreate } from '../src/index';
+import create from '@m78/seed';
+import { createAuth } from '../src/index';
 
-const auth = authCreate({
-  validFirst: true,
+const seed = create({
   state: {
     name: 'lxj',
     age: 17,
   },
+});
+
+const auth = createAuth({
+  validFirst: true,
+  seed,
   validators: {
     isLxj(state) {
       console.log(1);
@@ -46,15 +51,15 @@ const auth = authCreate({
 
 console.log(auth);
 
-auth.coverSetState({
+seed.coverSetState({
   name: 'jxl',
   age: 15,
 });
 
-console.log(auth.getState());
+console.log(seed.getState());
 
 console.log(
-  auth.auth(['isLxj', 'is18plus', 'isFalse'], {
+  auth(['isLxj', 'is18plus', 'isFalse'], {
     extra: 111,
     validators: {
       isFalse() {
