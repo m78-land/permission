@@ -2006,10 +2006,10 @@
     "@babel/runtime" "^7.7.6"
     "@types/node" "^13.11.0"
 
-"@m78/seed@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@m78/seed/-/seed-2.0.2.tgz#8c079b2237b1c987af154569ef2200d0645b279a"
-  integrity sha512-wZPqljB7mKO7HDzXnLLkB5EiO70qMxDMTLfLRxSUDP5aiClS9eAFQyfvlVmejLUHAwEE0jLhLSVExlY9jLUJQA==
+"@m78/seed@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/@m78/seed/-/seed-2.1.0.tgz#9ae0f2328bcc6fe207d7089205362a5081a7e155"
+  integrity sha512-3salfUnRo+s8ec96+BltsH8DexoZpBWiUfsoBb1fshWusAhrANKTwGEd2ipeUJTCRvOF/0+VecvM/gXlxroD9w==
   dependencies:
     "@lxjx/utils" "^1.13.0"
     tslib "^2.2.0"

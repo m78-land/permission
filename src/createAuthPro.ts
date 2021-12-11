@@ -33,7 +33,7 @@ const _createAuthPro: AuthProCreator = config => {
 
   const { seed } = _config;
 
-  seed.setState({
+  seed.set({
     auth: _config.auth!,
     authDetailMap: parseAuthString(share, _config.auth!),
   });
@@ -48,16 +48,16 @@ const _createAuthPro: AuthProCreator = config => {
   // auth变更时计算currentSchemaMap
   seed.subscribe(({ auth }) => {
     if (auth) {
-      seed.getState().authDetailMap = parseAuthString(share, auth);
+      seed.get().authDetailMap = parseAuthString(share, auth);
     }
   });
 
   const authPro: AuthPro = {
     setAuth: auth => {
-      seed.setState({ auth });
+      seed.set({ auth });
     },
-    getAuth: () => seed.getState().auth,
-    getAuthDetail: () => seed.getState().authDetailMap,
+    getAuth: () => seed.get().auth,
+    getAuthDetail: () => seed.get().authDetailMap,
     auth: keys => {
       const vm = authInstance([AUTH_PRO_NAME], {
         extra: keys,

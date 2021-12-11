@@ -5,7 +5,7 @@
     "auth",
     "permission"
   ],
-  "version": "1.1.4",
+  "version": "1.1.5",
   "main": "index.js",
   "module": "index.js",
   "types": "./",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@lxjx/utils": "^1.13.0",
-    "@m78/seed": "^2.0.2",
+    "@m78/seed": "^2.1.0",
     "@types/lodash": "^4.14.170",
     "lodash": "^4.17.21",
     "tslib": "^2.2.0"

@@ -38,7 +38,7 @@ export const validItem = (key: string, validators: Validators<any>, state: any, 
 export function authImpl(conf: CreateAuthConfig): Auth {
   const auth = (authKeys: AuthKeys<any>, config?: AuthConfig) => {
     const { validators, validFirst, seed } = conf;
-    const state = seed.getState();
+    const state = seed.get();
     const { extra, validators: localValidators }: AuthConfig = config || {};
 
     /** 所有验证失败结果 */
