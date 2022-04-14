@@ -1,8 +1,9 @@
 import create from '@m78/seed';
-import { createAuth, createAuthPro, CreateAuthConfig } from '../src';
+import { create as createPermission, createPro, CreatePermissionConfig } from '../src';
+import { update } from 'lodash';
 
 describe('auth', () => {
-  const getAuth = (conf?: Partial<CreateAuthConfig>) => {
+  const getAuth = (conf?: Partial<CreatePermissionConfig>) => {
     const seed = create({
       state: {
         verify: false,
@@ -14,7 +15,7 @@ describe('auth', () => {
       },
     });
 
-    return createAuth({
+    return createPermission({
       ...conf,
       seed,
       validators: {
@@ -111,92 +112,83 @@ describe('auth', () => {
 });
 
 describe('authPro', () => {
-  const authStrings = ['user:cr', 'news:ud'];
-  const authMap = {
-    user: {
-      create: true,
-      retrieve: true,
-    },
-    news: {
-      update: true,
-      delete: true,
-    },
+  const pm = {
+    user: ['create', 'update', 'delete'],
+    news: ['create', 'update', 'delete'],
   };
 
   test('api', () => {
-    const ap = createAuthPro({
+    const ap = createPro({
       seed: create(),
-      auth: ['user:cr', 'news:ud'], // init auth
+      permission: pm, // init
     });
 
     expect(ap).toMatchObject({
-      setAuth: expect.any(Function),
-      getAuth: expect.any(Function),
-      getAuthDetail: expect.any(Function),
-      auth: expect.any(Function),
-      parse: expect.any(Function),
-      stringify: expect.any(Function),
+      check: expect.any(Function),
+      seed: expect.any(Object),
     });
+
+    expect(ap.seed.get().permission).toEqual(pm);
   });
 
-  test('setAuth() & getAuth() & getAuthDetail() & parse() & stringify()', () => {
-    const ap = createAuthPro({
+  test('check()', () => {
+    const ap = createPro({
       seed: create(),
-    });
-
-    ap.setAuth(authStrings);
-
-    expect(ap.getAuth()).toEqual(authStrings);
-
-    expect(ap.getAuthDetail()).toEqual(authMap);
-
-    expect(ap.parse(authStrings)).toEqual(authMap);
-
-    expect(ap.stringify(authMap)).toEqual(authStrings);
-  });
-
-  test('auth()', () => {
-    const ap = createAuthPro({
-      seed: create(),
-      auth: authStrings,
-    });
-    expect(ap.auth(['user:ud', 'news:udc'])).toEqual([
-      { missing: ['update', 'delete'], name: 'user', originalName: 'user' },
-      { missing: ['create'], name: 'news', originalName: 'news' },
-    ]);
-
-    expect(ap.auth(authStrings)).toBe(null);
-  });
-
-  test('config', () => {
-    const ap = createAuthPro({
-      seed: create(),
-      lang: 'zh-CN',
-      auth: authStrings, // init auth
-      customAuthKeysMap: {
-        p: {
-          label: '发布',
-          name: 'publisher',
+      meta: {
+        each: meta => {
+          meta.desc = '这是一段扩展的权限描述';
+          return meta;
         },
-        a: {
-          label: '审批',
-          name: 'audit',
+        general: [
+          {
+            label: '更新4',
+            key: 'update4',
+          },
+        ],
+        modules: {
+          user: [
+            {
+              label: '更新5',
+              key: 'update5',
+            },
+          ],
         },
       },
-      authNameMap: {
-        user: '用户',
-      },
-      languages: {
-        'zh-CN': {
-          updateKey: '操作',
-        },
-      },
+      permission: pm,
     });
 
-    expect(ap.getAuth()).toEqual(authStrings);
-
-    expect(ap.auth(['user:upa'])).toEqual([
-      { missing: ['操作', '发布', '审批'], name: '用户', originalName: 'user' },
+    expect(ap.check(['user:create'])).toBe(null);
+    expect(ap.check(['user:create23|create525|create5152|update&create'])).toBe(null);
+    expect(ap.check(['user:create23&create525&create5152&update|create'])).toBe(null);
+    expect(ap.check(['user:create&update'])).toBe(null);
+    expect(ap.check(['user:create222|update'])).toBe(null);
+    expect(ap.check(['user:create2&update2|create'])).toBe(null);
+    expect(ap.check(['user:create|update2&create'])).toBe(null);
+    expect(ap.check(['user:create|update2|delete&create|create|update2'])).toBe(null);
+    expect(ap.check(['user:create&(update|update2)'])).toBe(null);
+    expect(ap.check(['user:(create|update22)&update)'])).toBe(null);
+    expect(ap.check(['user:create', ['user:create1', 'news:create']])).toBe(null);
+    expect(ap.check(['user:create&(update2|update3|update4|update5)'])).toEqual([
+      {
+        label: 'update2',
+        key: 'user.update2',
+        desc: '这是一段扩展的权限描述',
+      },
+      {
+        label: 'update3',
+        key: 'user.update3',
+        desc: '这是一段扩展的权限描述',
+      },
+      {
+        key: 'update4',
+        label: '更新4',
+        desc: '这是一段扩展的权限描述',
+      },
+      {
+        key: 'update5',
+        label: '更新5',
+        desc: '这是一段扩展的权限描述',
+      },
     ]);
   });
 });

@@ -1,26 +1,43 @@
 import create from '@m78/seed';
-import { createAuthPro } from '../src/index';
+import { createPro } from '../src/index';
+import { permissionProTplParser, checkAST } from '../src/common';
 
-const auth = createAuthPro({
+// console.log(authProTplParser('wqrwq:fwq'))
+// console.log(authProTplParser('user:create&delete'));
+// console.log(authProTplParser('user:create|delete'));
+// console.log(authProTplParser('user:create&delete|query'));
+// console.log(authProTplParser('user:create&(1delete|query)'))
+
+const ap = createPro({
   seed: create(),
-  languages: {
-    'zh-CN': {
-      noPermission: '😥 木有权限',
-    },
+  permission: {
+    user: ['query1', 'update', 'create'],
+    'mod2.news': ['publish', 'delete'],
   },
-  lang: 'zh-CN',
-  authNameMap: {
-    user: '用户',
-    news: '新闻',
-    audit: '审批',
-  },
-  // auth: ['user:d', 'news:cd'],
-  customAuthKeysMap: {
-    a: {
-      name: 'audit',
-      label: '审批',
+  meta: {
+    general: [
+      {
+        label: '创建',
+        key: 'create',
+        short: 'C',
+      },
+    ],
+    modules: {
+      user: [
+        {
+          label: '查询',
+          key: 'query11',
+          short: 'Q',
+        },
+        {
+          label: '更新',
+          key: 'update',
+          short: 'U',
+        },
+      ],
     },
   },
 });
 
-console.log(auth.auth(['user:cua', 'audit:crud']));
+console.log(ap.check(['user:create&update']));
+console.log(ap.check(['user:create&(query11|query2)']));

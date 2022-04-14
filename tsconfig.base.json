@@ -13,7 +13,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@m78/auth": ["src/index.ts"]
+      "@m78/permission": ["src/index.ts"]
     },
     "target": "es5",
     "module": "esnext",

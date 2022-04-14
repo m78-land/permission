@@ -1,7 +1,7 @@
-import { _createAuth as createAuth } from './createAuth';
-import { _createAuthPro as createAuthPro } from './createAuthPro';
-import { AUTH_PRO_NAME } from './common';
+import { _createPermission as create } from './createPermission';
+import { _createPermissionPro as createPro } from './createPermissionPro';
+import { PERMISSION_PRO_NAME } from './common';
 
-export { createAuth, createAuthPro, AUTH_PRO_NAME };
+export { create, createPro, PERMISSION_PRO_NAME };
 export * from './types';
 export * from './proType';

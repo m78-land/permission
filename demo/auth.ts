@@ -1,5 +1,5 @@
 import create from '@m78/seed';
-import { createAuth } from '../src/index';
+import { create as createPermission } from '../src/index';
 
 const seed = create({
   state: {
@@ -8,7 +8,7 @@ const seed = create({
   },
 });
 
-const auth = createAuth({
+const permission = createPermission({
   validFirst: true,
   seed,
   validators: {
@@ -49,17 +49,17 @@ const auth = createAuth({
   },
 });
 
-console.log(auth);
+console.log(permission);
 
-seed.coverSetState({
+seed.coverSet({
   name: 'jxl',
   age: 15,
 });
 
-console.log(seed.getState());
+console.log(seed.get());
 
 console.log(
-  auth(['isLxj', 'is18plus', 'isFalse'], {
+  permission(['isLxj', 'is18plus', 'isFalse'], {
     extra: 111,
     validators: {
       isFalse() {

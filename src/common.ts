@@ -1,24 +1,25 @@
-import { isArray } from '@lxjx/utils';
+import { isArray, isEmpty, isFunction, isString } from '@lxjx/utils';
 import {
-  AuthConfig,
-  AuthKeys,
-  Auth,
-  CreateAuthConfig,
+  Permission,
+  PermissionConfig,
+  PermissionKeys,
+  CreatePermissionConfig,
+  Validator,
   Validators,
   ValidMeta,
-  Validator,
 } from './types';
 import {
-  _AuthProShare,
-  AuthProDetailMap,
-  _AuthProFullKeysMap,
-  AuthProKeysMap,
-  AuthProStrings,
-  _AuthSeedProState,
+  _PermissionProSeedState,
+  _PermissionProAST,
+  PermissionProMeta,
+  PermissionProMetaConfig,
+  _PermissionProPiece,
+  _PermissionProPieceType,
+  PermissionProTpl,
 } from './proType';
 
-export const throwWarning = (str: string) => {
-  console.warn(`Auth 👻: ${str}`);
+export const throwError = (str: string): never => {
+  throw Error(`PermissionPro: ${str}`);
 };
 
 /**
@@ -33,13 +34,13 @@ export const validItem = (key: string, validators: Validators<any>, state: any, 
 };
 
 /**
- * 实现auth() api
+ * 实现Permission api
  * */
-export function authImpl(conf: CreateAuthConfig): Auth {
-  const auth = (authKeys: AuthKeys<any>, config?: AuthConfig) => {
+export function permissionImpl(conf: CreatePermissionConfig): Permission {
+  const permission = (keys: PermissionKeys<any>, config?: PermissionConfig) => {
     const { validators, validFirst, seed } = conf;
     const state = seed.get();
-    const { extra, validators: localValidators }: AuthConfig = config || {};
+    const { extra, validators: localValidators }: PermissionConfig = config || {};
 
     /** 所有验证失败结果 */
     const rejects: ValidMeta[] = [];
@@ -56,8 +57,8 @@ export function authImpl(conf: CreateAuthConfig): Auth {
         const tempRejects: ValidMeta[] = [];
         let flag = false;
 
-        for (const authItem of key) {
-          const meta = test(authItem, true);
+        for (const pItem of key) {
+          const meta = test(pItem, true);
 
           if (meta) {
             tempRejects.push(meta);
@@ -90,21 +91,21 @@ export function authImpl(conf: CreateAuthConfig): Auth {
     };
 
     if (validFirst) {
-      for (const authItem of authKeys) {
+      for (const pItem of keys) {
         if (pass) {
-          test(authItem);
+          test(pItem);
         }
       }
     } else {
-      authKeys.forEach(ak => test(ak));
+      keys.forEach(ak => test(ak));
     }
 
     return rejects.length ? rejects : null;
   };
 
-  auth.seed = conf.seed;
+  permission.seed = conf.seed;
 
-  return auth;
+  return permission;
 }
 
 /**
@@ -113,182 +114,259 @@ export function authImpl(conf: CreateAuthConfig): Auth {
  * ###############################################
  * */
 
-/** admin权限实现的主验证器key */
-export const AUTH_PRO_NAME = 'AUTH_PRO';
+/**
+ * 将PermissionTpl转换为PermissionProAST, 如果格式错误则抛出异常
+ * 首尾为特殊字符时异常
+ * */
+export function permissionProTplParser(tpl: PermissionProTpl) {
+  const invalidTip = `invalid permission template -> ${tpl}`;
+  const keyReg = /\w+|&|\||\(|\)/g;
 
-/** 获取所有(包含用户自定义)可用key组成的AuthKeyMap */
-export function getAuthKeyMap({ config, cLang }: _AuthProShare): AuthProKeysMap {
-  const { customAuthKeysMap } = config;
+  if (!tpl || !isString(tpl)) throwError(invalidTip);
 
-  /** 内置的所有权限key的完整名称映射 */
-  const builtInAuthKeysMap: AuthProKeysMap = {
-    c: {
-      name: 'create',
-      label: cLang.createKey,
-    },
-    r: {
-      name: 'retrieve',
-      label: cLang.retrieveKey,
-    },
-    u: {
-      name: 'update',
-      label: cLang.updateKey,
-    },
-    d: {
-      name: 'delete',
-      label: cLang.deleteKey,
-    },
-  };
+  const [mod, keys] = tpl.split(':');
 
-  return {
-    ...builtInAuthKeysMap,
-    ...customAuthKeysMap,
-  };
+  if (!mod || !keys) throwError(invalidTip);
+
+  const ast: _PermissionProAST = [];
+
+  let match: RegExpExecArray | null = null;
+  let bracketsFlag = false;
+  let lastType: _PermissionProPieceType | null = null;
+
+  while ((match = keyReg.exec(keys)) !== null) {
+    const s = match[0];
+
+    const ls = bracketsFlag ? (ast[ast.length - 1] as Array<_PermissionProPiece>) : ast;
+
+    switch (s) {
+      case '&':
+        ls.push({
+          type: _PermissionProPieceType.and,
+        });
+        lastType = _PermissionProPieceType.and;
+        break;
+      case '|':
+        ls.push({
+          type: _PermissionProPieceType.or,
+        });
+        lastType = _PermissionProPieceType.or;
+        break;
+      case '(':
+        if (!isArray(ls) || bracketsFlag) throwError(invalidTip);
+
+        ls.push([]);
+        bracketsFlag = true;
+        lastType = _PermissionProPieceType.leftBrackets;
+        break;
+      case ')':
+        bracketsFlag = false;
+        lastType = _PermissionProPieceType.rightBrackets;
+        break;
+      default:
+        if (lastType === _PermissionProPieceType.rightBrackets) throwError(invalidTip);
+
+        ls.push({
+          type: _PermissionProPieceType.key,
+          key: s,
+        });
+        lastType = _PermissionProPieceType.key;
+    }
+  }
+
+  if (!ast.length) throwError(invalidTip);
+
+  return [mod, ast] as const;
 }
 
-/** 从getAuthKeyMap()的返回中获取以完整name为key的AuthKeysMap */
-export function getAuthNameInfoMap(share: _AuthProShare): _AuthProFullKeysMap {
-  const keyMap = getAuthKeyMap(share);
-
-  const obj: _AuthProFullKeysMap = {};
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Object.entries(keyMap).forEach(([k, infos]) => {
-    obj[infos.name] = { ...infos, shortName: k };
-  });
-
-  return obj;
-}
+/** 权限实现的主验证器key */
+export const PERMISSION_PRO_NAME = 'PERMISSION_PRO';
 
 /**
- * 解析AuthStrings字符数组, 无效有效权限时返回null, 解析后的格式为:
- * ['user:crud', 'setting:c']
- *      =>
- * {
- *   user: {
- *     create: true,
- *     retrieve: true,
- *     update: true,
- *     delete: true,
- *   },
- *   setting: {
- *     create: true,
- *   }
- * }
- *
- * - 未知的权限key会被忽略
+ * PermissionPro内置验证器
  * */
-export function parseAuthString(share: _AuthProShare, strArr: AuthProStrings) {
-  if (!isArray(strArr) || !strArr.length) return null;
+export function permissionProValidatorGetter(/* 以后可能会接收配置 */) {
+  const validator: Validator<_PermissionProSeedState> = (
+    { permission, meta },
+    keys: Array<PermissionProTpl | PermissionProTpl[]>,
+  ): any /* pro需要改写验证返回 */ => {
+    if (isEmpty(permission)) return undefined;
 
-  // 过滤无效权限
-  const f = strArr.map(key => key.split(':')).filter(([k, a]) => k && k.length && a && a.length);
+    // 没有传入要验证的权限
+    if (!isArray(keys) || !keys.length) return null;
 
-  if (!f.length) return null;
+    let rejects: PermissionProMeta[] = [];
 
-  const map: AuthProDetailMap = {};
+    const checkItem = (k: string) => {
+      const [mod, ast] = permissionProTplParser(k);
+      return checkAST(ast, permission, mod, true, meta);
+    };
 
-  const authKeyMap = getAuthKeyMap(share);
+    const pushEject = (arg: ReturnType<typeof checkItem>) => {
+      if (!arg.pass) {
+        rejects.push(...arg.result.filter((item: any) => !item.pass));
+      }
+    };
 
-  const unknownKeys: string[] = [];
+    keys.forEach(item => {
+      if (isArray(item)) {
+        const temp: ReturnType<typeof checkItem>[] = [];
+        let passFlag = false;
 
-  f.forEach(([k, a]) => {
-    const auths = a.split('');
+        for (const string of item) {
+          const res = checkItem(string);
+          if (res.pass) {
+            passFlag = true;
+          } else {
+            temp.push(res);
+          }
+        }
 
-    let cAuth: any;
-
-    auths.forEach(authKey => {
-      const current = authKeyMap[authKey];
-      if (current) {
-        if (!cAuth) cAuth = {};
-        cAuth[current.name] = true;
+        !passFlag && temp.forEach(pushEject);
       } else {
-        unknownKeys.push(authKey);
+        pushEject(checkItem(item));
       }
     });
 
-    if (cAuth) {
-      map[k] = cAuth;
-    }
-  });
-
-  if (unknownKeys.length) {
-    throwWarning(`Unknown keys "${unknownKeys.join(', ')}". will be ignore`);
-  }
-
-  return map;
-}
-
-/**
- * 将AuthProDetailMap串化为AuthProStrings[]
- * */
-export function stringifyAuthMap(share: _AuthProShare, authMap: AuthProDetailMap) {
-  const authNameInfoMap = getAuthNameInfoMap(share);
-
-  const authKeys: AuthProStrings = [];
-
-  Object.entries(authMap).forEach(([key, auth]) => {
-    const keyS = Object.entries(auth)
-      .map(([_key]) => authNameInfoMap[_key])
-      .filter(item => !!item)
-      .map(item => item.shortName);
-    authKeys.push(`${key}:${keyS.join('')}`);
-  });
-
-  return authKeys;
-}
-
-/**
- * authPro内置验证器
- * */
-export const authProValidatorGetter = (share: _AuthProShare) => {
-  const validator: Validator<_AuthSeedProState> = ({ authDetailMap }, keys?: AuthProStrings) => {
-    const { authNameMap } = share.config;
-
-    if (!authDetailMap)
-      return [
-        {
-          originalName: share.cLang.noPermission,
-          name: share.cLang.noPermission,
-          missing: [],
-        },
-      ];
-
-    // 没有传入要验证的权限
-    if (!isArray(keys) || !keys.length) return;
-
-    const beTestAuthMap = parseAuthString(share, keys);
-
-    if (!beTestAuthMap) return;
-
-    let rejects: any = null;
-
-    const infosMap = getAuthNameInfoMap(share);
-
-    for (const [authName, beTestAuth] of Object.entries(beTestAuthMap)) {
-      const userAuth = authDetailMap[authName];
-
-      const _keys = Object.keys(beTestAuth);
-
-      // 取出不满足的权限
-      const rejectKeys = _keys.filter(k => !(beTestAuth[k] && userAuth && userAuth[k]));
-
-      if (rejectKeys.length) {
-        // 根据key获取其文本
-        const labelKeys = rejectKeys.map(item => (infosMap[item] ? infosMap[item].label : item));
-
-        if (!rejects) rejects = [];
-
-        rejects.push({
-          missing: labelKeys,
-          originalName: authName,
-          name: authNameMap?.[authName] || authName,
-        });
-      }
-    }
-
-    if (rejects) return rejects;
+    return rejects.length
+      ? rejects.map(item => {
+          return meta?.each ? meta.each(item.result) : item.result;
+        })
+      : null;
   };
 
   return validator;
-};
+}
+
+/** 对一个PermissionProAST执行验证 */
+export function checkAST(
+  ast: _PermissionProAST,
+  permission: _PermissionProSeedState['permission'],
+  mod: string,
+  isFirst: boolean,
+  meta?: PermissionProMetaConfig,
+) {
+  let result: any[] = [];
+  let pass = false;
+
+  let lastCondition: _PermissionProPieceType | null = null;
+  let lastPass: boolean | undefined;
+
+  for (const piece of ast) {
+    let res: any = null;
+
+    if (isArray(piece)) {
+      res = checkAST(piece, permission, mod, false, meta);
+    } else if (piece.type === _PermissionProPieceType.key) {
+      res = checkKeyPiece(piece, permission, mod, meta);
+    }
+
+    // 前一项为 & 和 | 时, 对比前后结果设置pass
+    if (
+      res &&
+      (lastCondition === _PermissionProPieceType.and ||
+        lastCondition === _PermissionProPieceType.or)
+    ) {
+      if (lastPass === undefined) {
+        lastPass = result[result.length - 1].pass;
+      }
+
+      if (lastCondition === _PermissionProPieceType.and) {
+        pass = res.pass && lastPass;
+        lastPass = pass;
+      }
+
+      if (lastCondition === _PermissionProPieceType.or) {
+        pass = res.pass || lastPass;
+        lastPass = pass;
+      }
+    }
+
+    if (res) result.push(res);
+
+    // 当前项为 & 和 | 时标记
+    if (
+      !isArray(piece) &&
+      (piece.type === _PermissionProPieceType.and || piece.type === _PermissionProPieceType.or)
+    ) {
+      lastCondition = piece.type;
+    }
+
+    // 不是则还原
+    if (res) {
+      lastCondition = null;
+    }
+  }
+
+  if (isFirst) {
+    const res = result.reduce((prev, item) => {
+      if (isArray(item.result)) {
+        prev.push(...item.result);
+      } else {
+        prev.push(item);
+      }
+
+      return prev;
+    }, []);
+
+    return {
+      // 只有一项上面代码不会走到pass的流程, 直接使用该项的pass
+      pass: res.length === 1 ? res[0].pass : pass,
+      result: res,
+    };
+  }
+
+  return {
+    pass,
+    result,
+  };
+}
+
+/** 根据权限对单个key类型的PermissionProPiece进行检查 */
+function checkKeyPiece(
+  piece: _PermissionProPiece,
+  permission: _PermissionProSeedState['permission'],
+  mod: string,
+  meta?: PermissionProMetaConfig,
+) {
+  const permissions = permission[mod];
+
+  const result = getMeta(mod, piece.key!, meta);
+
+  if (!isArray(permissions) || !permissions.length) return { pass: false, result };
+
+  const pass = permissions.includes(piece.key!);
+
+  return {
+    pass,
+    result,
+  };
+}
+
+/** 根据key从指定meta配置中拿到其对应的meta信息, 没有则根据key和mod生成回退meta */
+function getMeta(mod: string, key: string, meta?: PermissionProMetaConfig): PermissionProMeta {
+  const defaultMeta = {
+    label: key,
+    key: `${mod}.${key}`,
+  };
+
+  if (!meta || !meta.general?.length || isEmpty(meta.modules)) return defaultMeta;
+
+  if (!isEmpty(meta.modules)) {
+    let currentMeta = meta.modules![mod];
+
+    if (currentMeta?.length) {
+      const c = currentMeta.find(item => item.key === key);
+
+      if (c) return { ...c };
+    }
+  }
+
+  if (meta.general?.length) {
+    const c = meta.general.find(item => item.key === key);
+
+    if (c) return { ...c };
+  }
+
+  return defaultMeta;
+}
