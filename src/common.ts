@@ -1,4 +1,4 @@
-import { isArray, isEmpty, isFunction, isString } from '@lxjx/utils';
+import { isArray, isEmpty, isString } from '@lxjx/utils';
 import {
   Permission,
   PermissionConfig,
@@ -134,6 +134,7 @@ export function permissionProTplParser(tpl: PermissionProTpl) {
   let bracketsFlag = false;
   let lastType: _PermissionProPieceType | null = null;
 
+  // eslint-disable-next-line no-cond-assign
   while ((match = keyReg.exec(keys)) !== null) {
     const s = match[0];
 
@@ -195,7 +196,7 @@ export function permissionProValidatorGetter(/* 以后可能会接收配置 */) 
     // 没有传入要验证的权限
     if (!isArray(keys) || !keys.length) return null;
 
-    let rejects: PermissionProMeta[] = [];
+    const rejects: PermissionProMeta[] = [];
 
     const checkItem = (k: string) => {
       const [mod, ast] = permissionProTplParser(k);
@@ -246,7 +247,7 @@ export function checkAST(
   isFirst: boolean,
   meta?: PermissionProMetaConfig,
 ) {
-  let result: any[] = [];
+  const result: any[] = [];
   let pass = false;
 
   let lastCondition: _PermissionProPieceType | null = null;
@@ -353,7 +354,7 @@ function getMeta(mod: string, key: string, meta?: PermissionProMetaConfig): Perm
   if (!meta || !meta.general?.length || isEmpty(meta.modules)) return defaultMeta;
 
   if (!isEmpty(meta.modules)) {
-    let currentMeta = meta.modules![mod];
+    const currentMeta = meta.modules![mod];
 
     if (currentMeta?.length) {
       const c = currentMeta.find(item => item.key === key);

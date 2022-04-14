@@ -1,7 +1,7 @@
+import create from '@m78/seed';
 import { _PermissionProSeedState, PermissionProMeta, create as createPermission } from './index';
 import { PermissionPro, PermissionProCreator } from './proType';
 import { PERMISSION_PRO_NAME, permissionProValidatorGetter } from './common';
-import create from '@m78/seed';
 
 const _createPermissionPro: PermissionProCreator = config => {
   const _config = {
