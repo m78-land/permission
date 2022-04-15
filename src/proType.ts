@@ -1,4 +1,5 @@
 import { Seed } from '@m78/seed';
+import { Permission } from './types';
 
 /**
  * 权限模板
@@ -76,6 +77,8 @@ export interface PermissionPro {
   check: (keys: Array<PermissionProTpl | PermissionProTpl[]>) => PermissionProMeta[] | null;
   /** 内部使用的seed实例 */
   seed: Seed<_PermissionProSeedState>;
+  /** 内部使用的常规版permission实例 */
+  permission?: Permission<_PermissionProSeedState>;
 }
 
 export interface _PermissionProSeedState {
@@ -94,7 +97,7 @@ export interface PermissionProConfig {
    * - 此配置用来为权限附加更多的可用信息, 如权限名, 权限描述, 可用的操作等等, 方便使用者通过这些信息创建更友好的失败反馈.
    * */
   meta?: PermissionProMetaConfig;
-  /** 用于控制内部状态的seed */
+  /** 内部使用的的seed, 如果创建pro时传入了seed则两者是相同的 */
   seed?: Seed;
 }
 

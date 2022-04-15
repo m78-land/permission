@@ -33,6 +33,7 @@ const _createPermissionPro: PermissionProCreator = config => {
       return vm?.length ? ((vm[0] as any) as PermissionProMeta[]) : null;
     },
     seed,
+    permission,
   };
 
   return pro;
