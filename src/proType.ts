@@ -57,15 +57,33 @@ export interface PermissionProMeta {
   [key: string]: any;
 }
 
+/** 用于描述验证失败的元信息 */
+export type PermissionProRejectMeta =
+  | null
+  | {
+      /** 所属模块名称 */
+      label: string;
+      /** 模块的key */
+      module: string;
+      /** 缺失的权限 */
+      missing: PermissionProMeta[];
+    }[];
+
 /**
  * meta配置
  * */
 export interface PermissionProMetaConfig {
   /** 通用配置, 如果modules中没有匹配则使用这里的配置 */
   general?: PermissionProMeta[];
-  /** 每个模块独立的配置 */
+  /** 每个模块独立的配置, 可以是权限信息数组或包含module名的对象 */
   modules?: {
-    [key: string]: PermissionProMeta[];
+    [key: string]:
+      | PermissionProMeta[]
+      | {
+          /** 模块名 */
+          label?: string;
+          list?: PermissionProMeta[];
+        };
   };
   /** 用于在验证meta生成前对其改写 */
   each?: (meta: PermissionProMeta) => PermissionProMeta;
@@ -74,11 +92,11 @@ export interface PermissionProMetaConfig {
 /** PermissionPro实例 */
 export interface PermissionPro {
   /** 执行验证, 如果验证失败, 返回缺失权限组成的数组, 如果数组项为数组则表示逻辑 `or` */
-  check: (keys: Array<PermissionProTpl | PermissionProTpl[]>) => PermissionProMeta[] | null;
+  check: (keys: Array<PermissionProTpl | PermissionProTpl[]>) => PermissionProRejectMeta;
   /** 内部使用的seed实例 */
   seed: Seed<_PermissionProSeedState>;
   /** 内部使用的常规版permission实例 */
-  permission?: Permission<_PermissionProSeedState>;
+  permission: Permission<_PermissionProSeedState>;
 }
 
 export interface _PermissionProSeedState {

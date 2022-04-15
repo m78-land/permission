@@ -168,12 +168,18 @@ const pro = createPro({
      ],
      // 针对特定模块的meta, 优先级大于general
      modules: {
-        user: [
+        // 指定模块名称和其对应的权限项
+        user: {
+          label: '用户',
+        	list: [
             {
               label: '更新',
               key: 'update',
             },
-        ],
+        	]
+        },
+        // 如果不需要指定模块名则可以直接传权限项配置
+        news: [...]
      },
      // 可用于在验证meta生成前对其改写
      each: meta => meta,
@@ -186,15 +192,28 @@ pro.check(['user:create&delete', 'news:create|query']);
 pro.check(['user:create', ['user:create', 'news:query']]);
 
 // 当验证失败时, 返回如下的结构, 验证成功则返回null
+// 根据meta配置, 输出的反馈信息会有些许不同
 [
   {
-    label: '更新',
-    key: 'user.update',
+    label: '用户',
+    module: 'user',
+    missing: [
+      {
+        label: '更新',
+        key: 'user.update',
+      },
+    ],
   },
   {
-    label: '创建',
-    key: 'news.create',
-    desc: '创建某些东西..',
+    label: 'news',
+    module: 'news',
+    missing: [
+      {
+        label: '创建',
+        key: 'news.create',
+        desc: '创建某些东西..',
+      },
+    ],
   },
 ]
 

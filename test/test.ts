@@ -1,6 +1,5 @@
 import create from '@m78/seed';
 import { create as createPermission, createPro, CreatePermissionConfig } from '../src';
-import { update } from 'lodash';
 
 describe('auth', () => {
   const getAuth = (conf?: Partial<CreatePermissionConfig>) => {
@@ -126,6 +125,7 @@ describe('authPro', () => {
     expect(ap).toMatchObject({
       check: expect.any(Function),
       seed: expect.any(Object),
+      permission: expect.any(Object),
     });
 
     expect(ap.seed.get().permission).toEqual(pm);
@@ -146,12 +146,15 @@ describe('authPro', () => {
           },
         ],
         modules: {
-          user: [
-            {
-              label: '更新5',
-              key: 'update5',
-            },
-          ],
+          user: {
+            label: '用户',
+            list: [
+              {
+                label: '更新5',
+                key: 'update5',
+              },
+            ],
+          },
         },
       },
       permission: pm,
@@ -170,24 +173,30 @@ describe('authPro', () => {
     expect(ap.check(['user:create', ['user:create1', 'news:create']])).toBe(null);
     expect(ap.check(['user:create&(update2|update3|update4|update5)'])).toEqual([
       {
-        label: 'update2',
-        key: 'user.update2',
-        desc: '这是一段扩展的权限描述',
-      },
-      {
-        label: 'update3',
-        key: 'user.update3',
-        desc: '这是一段扩展的权限描述',
-      },
-      {
-        key: 'update4',
-        label: '更新4',
-        desc: '这是一段扩展的权限描述',
-      },
-      {
-        key: 'update5',
-        label: '更新5',
-        desc: '这是一段扩展的权限描述',
+        label: '用户',
+        module: 'user',
+        missing: [
+          {
+            label: 'update2',
+            key: 'user.update2',
+            desc: '这是一段扩展的权限描述',
+          },
+          {
+            label: 'update3',
+            key: 'user.update3',
+            desc: '这是一段扩展的权限描述',
+          },
+          {
+            key: 'update4',
+            label: '更新4',
+            desc: '这是一段扩展的权限描述',
+          },
+          {
+            key: 'update5',
+            label: '更新5',
+            desc: '这是一段扩展的权限描述',
+          },
+        ],
       },
     ]);
   });

@@ -16,6 +16,7 @@ import {
   _PermissionProPiece,
   _PermissionProPieceType,
   PermissionProTpl,
+  PermissionProRejectMeta,
 } from './proType';
 
 export const throwError = (str: string): never => {
@@ -229,11 +230,38 @@ export function permissionProValidatorGetter(/* 以后可能会接收配置 */) 
       }
     });
 
-    return rejects.length
-      ? rejects.map(item => {
-          return meta?.each ? meta.each(item.result) : item.result;
-        })
-      : null;
+    if (!rejects.length) return null;
+
+    const rejectMeta: NonNullable<PermissionProRejectMeta> = [];
+
+    rejects.forEach(item => {
+      const current: PermissionProMeta = meta?.each ? meta.each(item.result) : item.result;
+
+      const modKey = current.__mod;
+      const moduleMeta = meta?.modules || {};
+      const currentMod = moduleMeta[modKey];
+      let label = modKey;
+
+      if (!isArray(currentMod) && currentMod.label) {
+        label = currentMod.label;
+      }
+
+      const currentRejectMeta = rejectMeta.find(it => it.module === modKey);
+
+      if (!currentRejectMeta) {
+        rejectMeta.push({
+          label,
+          module: modKey,
+          missing: [current],
+        });
+      } else {
+        currentRejectMeta.missing.push(current);
+      }
+
+      delete current.__mod;
+    });
+
+    return rejectMeta;
   };
 
   return validator;
@@ -349,6 +377,7 @@ function getMeta(mod: string, key: string, meta?: PermissionProMetaConfig): Perm
   const defaultMeta = {
     label: key,
     key: `${mod}.${key}`,
+    __mod: mod,
   };
 
   if (!meta || !meta.general?.length || isEmpty(meta.modules)) return defaultMeta;
@@ -356,17 +385,19 @@ function getMeta(mod: string, key: string, meta?: PermissionProMetaConfig): Perm
   if (!isEmpty(meta.modules)) {
     const currentMeta = meta.modules![mod];
 
-    if (currentMeta?.length) {
-      const c = currentMeta.find(item => item.key === key);
+    const list = isArray(currentMeta) ? currentMeta : currentMeta?.list;
 
-      if (c) return { ...c };
+    if (list?.length) {
+      const c = list.find(item => item.key === key);
+
+      if (c) return { ...c, __mod: mod };
     }
   }
 
   if (meta.general?.length) {
     const c = meta.general.find(item => item.key === key);
 
-    if (c) return { ...c };
+    if (c) return { ...c, __mod: mod };
   }
 
   return defaultMeta;
