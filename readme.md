@@ -25,7 +25,7 @@ yarn add @m78/permission
 
 * 使用了[@m78/seed](https://github.com/m78-core/seed)来管理状态, `seed`是一个非常简单易学的状态管理方案，使用前建议先了解下它的用法。
 * 它被设计得足够通用，可以在任意js运行时使用，包括但不限于`nodejs` `ReactNative` `小程序 `等, 如果你的前后端都是js的话, 可以复用一套权限逻辑。
-* 如果你在前端框架中使用，可能会需要对其进行简单的封装, 若使用react，可以使用官方实现  [`m78/auth`](https://m78.vercel.app/docs/ecology/auth) , 其他框架可以参考其实现来编写。
+* 如果你在前端框架中使用，可能会需要对其进行简单的封装, 若使用react，可以使用官方实现  [`m78/permission`](https://m78.vercel.app/docs/ecology/permission) , 其他框架可以参考其实现来编写。
 
 <br>
 
