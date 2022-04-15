@@ -242,7 +242,7 @@ export function permissionProValidatorGetter(/* 以后可能会接收配置 */) 
       const currentMod = moduleMeta[modKey];
       let label = modKey;
 
-      if (!isArray(currentMod) && currentMod.label) {
+      if (!isArray(currentMod) && currentMod?.label) {
         label = currentMod.label;
       }
 
