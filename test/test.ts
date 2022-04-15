@@ -125,7 +125,7 @@ describe('authPro', () => {
     expect(ap).toMatchObject({
       check: expect.any(Function),
       seed: expect.any(Object),
-      permission: expect.any(Object),
+      permission: expect.any(Function),
     });
 
     expect(ap.seed.get().permission).toEqual(pm);
