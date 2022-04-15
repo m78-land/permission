@@ -1,7 +1,6 @@
 import create from '@m78/seed';
 import {
   _PermissionProSeedState,
-  PermissionProMeta,
   create as createPermission,
   PermissionProRejectMeta,
 } from './index';
