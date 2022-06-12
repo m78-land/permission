@@ -5,15 +5,9 @@
     "react",
     "permission"
   ],
-  "version": "2.1.2",
+  "version": "2.1.3",
   "main": "./umd/index.js",
   "module": "index.js",
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./umd/index.js"
-    }
-  },
   "types": "./",
   "repository": "https://github.com/m78-land/permission.git",
   "author": {
