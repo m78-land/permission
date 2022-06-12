@@ -2022,10 +2022,10 @@
     lodash "^4.17.21"
     tslib "^2.1.0"
 
-"@m78/seed@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.npmjs.org/@m78/seed/-/seed-2.1.0.tgz#9ae0f2328bcc6fe207d7089205362a5081a7e155"
-  integrity sha512-3salfUnRo+s8ec96+BltsH8DexoZpBWiUfsoBb1fshWusAhrANKTwGEd2ipeUJTCRvOF/0+VecvM/gXlxroD9w==
+"@m78/seed@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.npmjs.org/@m78/seed/-/seed-2.1.1.tgz#930341ee88f5d3eb890dd935dca1e9db734327a0"
+  integrity sha512-Rm1qKd7XV0+S0TVHJVdjZqA5bPu877UeGnr2Q613aS+NCNmijmsd5YF/7D6gxuK3ByEcjD+3251DMueuZoPZkQ==
   dependencies:
     "@lxjx/utils" "^1.13.0"
     tslib "^2.2.0"

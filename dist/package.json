@@ -5,15 +5,9 @@
     "react",
     "permission"
   ],
-  "version": "2.1.2",
-  "main": "./umd/index.js",
+  "version": "2.1.1",
+  "main": "index.js",
   "module": "index.js",
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "require": "./umd/index.js"
-    }
-  },
   "types": "./",
   "repository": "https://github.com/m78-land/permission.git",
   "author": {
@@ -61,7 +55,7 @@
   },
   "dependencies": {
     "@lxjx/utils": "^1.7.9",
-    "@m78/seed": "^2.1.1",
+    "@m78/seed": "^2.1.0",
     "@types/lodash": "^4.14.170",
     "lodash": "^4.17.21",
     "tslib": "^2.3.1"
