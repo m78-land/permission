@@ -192,8 +192,6 @@ export function permissionProValidatorGetter(/* 以后可能会接收配置 */) 
     { permission, meta },
     keys: Array<PermissionProTpl | PermissionProTpl[]>,
   ): any /* pro需要改写验证返回 */ => {
-    if (isEmpty(permission)) return undefined;
-
     // 没有传入要验证的权限
     if (!isArray(keys) || !keys.length) return null;
 
