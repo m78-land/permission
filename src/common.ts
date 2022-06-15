@@ -374,11 +374,11 @@ function checkKeyPiece(
 function getMeta(mod: string, key: string, meta?: PermissionProMetaConfig): PermissionProMeta {
   const defaultMeta = {
     label: key,
-    key: `${mod}.${key}`,
+    key,
     __mod: mod,
   };
 
-  if (!meta || !meta.general?.length || isEmpty(meta.modules)) return defaultMeta;
+  if (!meta || (!meta.general?.length && isEmpty(meta.modules))) return defaultMeta;
 
   if (!isEmpty(meta.modules)) {
     const currentMeta = meta.modules![mod];

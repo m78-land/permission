@@ -1,5 +1,5 @@
 import create from '@m78/seed';
-import { create as createPermission, createPro, CreatePermissionConfig } from '../src';
+import {create as createPermission, createPro, CreatePermissionConfig} from '../src';
 
 describe('auth', () => {
   const getAuth = (conf?: Partial<CreatePermissionConfig>) => {
@@ -18,7 +18,7 @@ describe('auth', () => {
       ...conf,
       seed,
       validators: {
-        verify({ verify }) {
+        verify({verify}) {
           if (!verify) {
             return {
               label: 'not verify',
@@ -26,7 +26,7 @@ describe('auth', () => {
             };
           }
         },
-        login({ usr }) {
+        login({usr}) {
           if (!usr) {
             return {
               label: 'not log',
@@ -34,7 +34,7 @@ describe('auth', () => {
             };
           }
         },
-        audit({ usr }) {
+        audit({usr}) {
           if (!usr.audit) {
             return {
               label: 'not audit',
@@ -42,7 +42,7 @@ describe('auth', () => {
             };
           }
         },
-        vip({ usr }) {
+        vip({usr}) {
           if (!usr.vip) {
             return {
               label: 'not vip',
@@ -50,7 +50,7 @@ describe('auth', () => {
             };
           }
         },
-        self({ usr }, extra) {
+        self({usr}, extra) {
           if (usr && usr.name !== extra) {
             return {
               label: 'not self',
@@ -85,13 +85,13 @@ describe('auth', () => {
   test('extra', () => {
     const auth = getAuth();
 
-    const rej = auth(['self'], { extra: 'lxj' });
+    const rej = auth(['self'], {extra: 'lxj'});
 
     expect(rej).toBe(null);
   });
 
   test('local validators & validFirst', () => {
-    const auth = getAuth({ validFirst: true });
+    const auth = getAuth({validFirst: true});
 
     const rej = auth(['isJxl', 'self'], {
       extra: 1,
@@ -106,7 +106,7 @@ describe('auth', () => {
       },
     });
 
-    expect(rej).toEqual([{ label: 'Must be jxl1' }]);
+    expect(rej).toEqual([{label: 'Must be jxl1'}]);
   });
 });
 
@@ -178,12 +178,12 @@ describe('authPro', () => {
         missing: [
           {
             label: 'update2',
-            key: 'user.update2',
+            key: 'update2',
             desc: '这是一段扩展的权限描述',
           },
           {
             label: 'update3',
-            key: 'user.update3',
+            key: 'update3',
             desc: '这是一段扩展的权限描述',
           },
           {
